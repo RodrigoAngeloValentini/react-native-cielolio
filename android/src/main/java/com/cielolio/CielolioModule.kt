@@ -6,9 +6,9 @@ import cielo.orders.domain.Credentials
 import cielo.orders.domain.Order
 import cielo.sdk.order.OrderManager
 import cielo.sdk.order.ServiceBindListener
+import cielo.sdk.order.payment.Payment
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -16,6 +16,7 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.google.gson.Gson
+
 
 class CielolioModule(private var reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -86,20 +87,20 @@ class CielolioModule(private var reactContext: ReactApplicationContext) :
             order.markAsPaid()
             orderManager?.updateOrder(order)
 
-            val payment = order.payments[0]
+            val paymentResult: List<Payment> = order.payments
 
             val gson: Gson = Gson()
-            val json: String = gson.toJson(payment)
-
-            orderManager?.unbind()
+            val json: String = gson.toJson(paymentResult)
 
             promise.resolve(json)
+
+            orderManager?.unbind()
           }
 
           override fun onCancel() {
             Log.d(TAG, "A operação foi cancelada")
 
-            promise.reject("error", "Pagamento cancelado")
+            promise.reject("error", "Pagamento cancelado2")
           }
 
           override fun onError(error: PaymentError) {
