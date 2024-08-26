@@ -107,5 +107,8 @@ dependencies {
   // implementation "com.facebook.react:react-android:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation 'com.cielo.lio:order-manager:1.8.6'
+  implementation "com.squareup.okhttp3:okhttp"
+  implementation platform("com.squareup.okhttp3:okhttp-bom:4.4.1")
+  implementation 'org.jetbrains:annotations:23.0.0'
 }
 
