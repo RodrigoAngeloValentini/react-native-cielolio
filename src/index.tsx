@@ -17,12 +17,16 @@ const Cielolio = NativeModules.Cielolio
       }
     );
 
-export function startPayment(
-  clientID: string,
-  accessToken: string,
+export function init(clientID: string, accessToken: string): Promise<number> {
+  return Cielolio.startPayment(clientID, accessToken);
+}
+
+export function requestPayment(
+  amount: number,
   orderId: string,
-  sku: string,
-  amount: number
+  name: string,
+  quantity: number,
+  unityOfMeasure: string
 ): Promise<number> {
-  return Cielolio.startPayment(clientID, accessToken, orderId, sku, amount);
+  return Cielolio.startPayment(amount, orderId, name, quantity, unityOfMeasure);
 }

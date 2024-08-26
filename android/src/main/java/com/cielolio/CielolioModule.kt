@@ -10,6 +10,7 @@ import cielo.sdk.order.ServiceBindListener
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -17,12 +18,12 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class CielolioModule(private var reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-  private val TAG = "RNLio"
+  private val TAG = "CiloLioModule"
 
   private var clientID: String = ""
   private var accessToken: String = ""
-  private lateinit var credentials: Credentials
-  private lateinit var orderManager: OrderManager
+  private var credentials: Credentials? = null
+  private var orderManager: OrderManager? = null
   private var order: Order? = null
   private var paymentType: String = ""
 
@@ -40,26 +41,27 @@ class CielolioModule(private var reactContext: ReactApplicationContext) : ReactC
   }
 
   @ReactMethod
-  fun startPayment(clientID: String, accessToken: String, orderId: String, sku: String, amount: Int) {
+  fun init(clientID: String, accessToken: String, promise: Promise) {
     this.clientID = clientID
     this.accessToken = accessToken
     this.paymentType = ""
     this.order = null
+    this.orderManager = null;
 
     this.credentials = Credentials(this.clientID, this.accessToken)
-    this.orderManager = OrderManager(credentials, this.reactContext)
+    this.orderManager = OrderManager(credentials!!, this.reactContext)
 
     val serviceBindListener = object : ServiceBindListener {
       override fun onServiceBound() {
         Log.d(TAG, "onServiceBound")
 
-        createDraftOrder(orderId);
-        addOrderItem(sku, amount, "PRODUCT", 1, "UN")
-        requestPayment(amount, orderId)
+        promise.resolve("onServiceBound");
       }
 
       override fun onServiceBoundError(throwable: Throwable) {
         Log.d(TAG, "onServiceBoundError")
+
+        promise.reject("onServiceBoundError", throwable);
       }
 
       override fun onServiceUnbound() {
@@ -67,10 +69,21 @@ class CielolioModule(private var reactContext: ReactApplicationContext) : ReactC
       }
     }
 
-    orderManager.bind(this.reactContext, serviceBindListener)
+    orderManager!!.bind(this.reactContext, serviceBindListener)
   }
 
-  private fun createPaymentListener(): PaymentListener {
+  @ReactMethod
+  fun requestPayment(amount: Int, orderId: String, sku: String, name: String, quantity: Int, unityOfMeasure: String, promise: Promise) {
+    order = orderManager?.createDraftOrder(orderId)
+
+    order!!.addItem(sku, name, amount.toLong(), quantity, unityOfMeasure)
+
+    orderManager?.placeOrder(order!!)
+    val checkoutRequest: CheckoutRequest = CheckoutRequest.Builder()
+      .orderId(order!!.id)
+      .amount(amount.toLong())
+      .build()
+
     val paymentListener: PaymentListener = object : PaymentListener {
       override fun onStart() {
         Log.d(TAG, "O pagamento começou.")
@@ -79,25 +92,17 @@ class CielolioModule(private var reactContext: ReactApplicationContext) : ReactC
       override fun onPayment(order: Order) {
         Log.d(TAG, "Um pagamento foi realizado")
         order.markAsPaid()
-        orderManager.updateOrder(order)
-        val infoManager = InfoManager()
+        orderManager?.updateOrder(order)
 
-        var amount = 0.0
-        var installments = 1
         val product = paymentType
-        var brand = ""
-        var nsu = ""
-        var authorizationCode = ""
-        var authorizationDate = ""
-
         val payment = order.payments[0]
 
-        amount = order.paidAmount.toDouble()
-        installments = Math.toIntExact(payment.installments)
-        brand = payment.brand
-        nsu = payment.cieloCode
-        authorizationCode = payment.authCode
-        authorizationDate = payment.requestDate
+        val amount = order.paidAmount.toDouble()
+        val installments = Math.toIntExact(payment.installments)
+        val brand = payment.brand
+        val nsu = payment.cieloCode
+        val authorizationCode = payment.authCode
+        val authorizationDate = payment.requestDate
 
         val stateService = Arguments.createMap()
 
@@ -110,37 +115,25 @@ class CielolioModule(private var reactContext: ReactApplicationContext) : ReactC
         stateService.putString("authorizationCode", authorizationCode)
         stateService.putString("authorizationDate", authorizationDate)
 
-        orderManager.unbind()
+        orderManager?.unbind()
+
+        promise.resolve(stateService)
       }
 
       override fun onCancel() {
         Log.d(TAG, "A operação foi cancelada")
+
+        promise.reject("error", "Pagamento cancelado")
       }
 
       override fun onError(error: PaymentError) {
         Log.d(TAG, "Houve um erro no pagamento.")
+
+        promise.reject("error", "Houve um erro no pagamento")
       }
     }
 
-    return paymentListener
-  }
-
-  fun requestPayment(amount: Int, orderId: String?) {
-    orderManager.placeOrder(order!!)
-    val checkoutRequest: CheckoutRequest = CheckoutRequest.Builder()
-      .orderId(order!!.id)
-      .amount(amount.toLong())
-      .build()
-
-    orderManager.checkoutOrder(checkoutRequest, createPaymentListener())
-  }
-
-  fun createDraftOrder(orderId: String?) {
-    order = orderManager.createDraftOrder(orderId!!)
-  }
-
-  fun addOrderItem(sku: String, amount: Int, name: String, quantity: Int, unityOfMeasure: String) {
-    order!!.addItem(sku, name, amount.toLong(), quantity, unityOfMeasure)
+    orderManager?.checkoutOrder(checkoutRequest, paymentListener)
   }
 
   private fun sendEvent(eventName: String, params: WritableMap?) {
