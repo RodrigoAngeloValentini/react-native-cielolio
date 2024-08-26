@@ -9,7 +9,6 @@ import cielo.sdk.order.ServiceBindListener
 import cielo.sdk.order.payment.Payment
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -17,7 +16,6 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.google.gson.Gson
-
 
 class CielolioModule(private var reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -90,15 +88,12 @@ class CielolioModule(private var reactContext: ReactApplicationContext) :
 
             val paymentResult: List<Payment> = order.payments
 
-            val gson: Gson = Gson()
+            val gson = Gson()
             val json: String = gson.toJson(paymentResult)
 
-            val data = Arguments.createMap()
-            data.putString("payment", json)
+            promise.resolve(json)
 
             orderManager?.unbind()
-
-            promise.resolve(data)
           }
 
           override fun onCancel() {
