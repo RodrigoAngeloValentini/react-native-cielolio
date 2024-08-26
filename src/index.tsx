@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const Cielolio = NativeModules.Cielolio
-  ? NativeModules.Cielolio
+const CieloLio = NativeModules.CieloLio
+  ? NativeModules.CieloLio
   : new Proxy(
       {},
       {
@@ -17,7 +17,33 @@ const Cielolio = NativeModules.Cielolio
       }
     );
 
-export function startPayment(
+function initialize(clientID: string, accessToken: string): Promise<void> {
+  return CieloLio.initialize(clientID, accessToken);
+}
+
+function createDraftOrder(orderId: string): void {
+  return CieloLio.createDraftOrder(orderId);
+}
+
+function addItem(
+  sku: string,
+  name: string,
+  unitPrice: number,
+  quantity: number,
+  unitOfMeasure: string
+) {
+  return CieloLio.addItem(sku, name, unitPrice, quantity, unitOfMeasure);
+}
+
+function placeOrder(): void {
+  return CieloLio.placeOrder();
+}
+
+function requestPayment(amount: number, orderId: string): string {
+  return CieloLio.requestPayment(amount, orderId);
+}
+
+function initializeAndRequestPayment(
   clientID: string,
   accessToken: string,
   amount: number,
@@ -26,8 +52,8 @@ export function startPayment(
   name: string,
   quantity: number,
   unityOfMeasure: string
-): Promise<any> {
-  return Cielolio.startPayment(
+): Promise<string> {
+  return CieloLio.initializeAndRequestPayment(
     clientID,
     accessToken,
     amount,
@@ -38,3 +64,12 @@ export function startPayment(
     unityOfMeasure
   );
 }
+
+export {
+  initialize,
+  createDraftOrder,
+  addItem,
+  placeOrder,
+  requestPayment,
+  initializeAndRequestPayment,
+};
