@@ -17,6 +17,12 @@ const Cielolio = NativeModules.Cielolio
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return Cielolio.multiply(a, b);
+export function startPayment(
+  clientID: string,
+  accessToken: string,
+  orderId: string,
+  sku: string,
+  amount: number
+): Promise<number> {
+  return Cielolio.startPayment(clientID, accessToken, orderId, sku, amount);
 }

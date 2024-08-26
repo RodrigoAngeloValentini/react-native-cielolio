@@ -5,10 +5,15 @@ buildscript {
   repositories {
     google()
     mavenCentral()
+    mavenLocal()
+    maven {
+      // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+      url("$rootDir/../node_modules/react-native/android")
+    }
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.2.1"
+    classpath "com.android.tools.build:gradle:7.2.2"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
@@ -83,6 +88,11 @@ android {
 }
 
 repositories {
+  mavenLocal()
+  maven {
+      // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+      url("$rootDir/../node_modules/react-native/android")
+  }
   mavenCentral()
   google()
 }
@@ -90,10 +100,12 @@ repositories {
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  // For < 0.71, this will be from the local maven repo
-  // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
-  //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"
+  //  For < 0.71, this will be from the local maven repo
+  //  For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
+  //  noinspection GradleDynamicVersion
+  implementation "com.facebook.react:react-native:+"  // From node_modules
+  // implementation "com.facebook.react:react-android:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation 'com.cielo.lio:order-manager:1.8.6'
 }
 
