@@ -31,7 +31,7 @@ function addItem(
   unitPrice: number,
   quantity: number,
   unitOfMeasure: string
-) {
+): void {
   return CieloLio.addItem(sku, name, unitPrice, quantity, unitOfMeasure);
 }
 
@@ -39,7 +39,7 @@ function placeOrder(): void {
   return CieloLio.placeOrder();
 }
 
-function requestPayment(amount: number, orderId: string): string {
+function requestPayment(amount: number, orderId: string): Promise<string> {
   return CieloLio.requestPayment(amount, orderId);
 }
 
