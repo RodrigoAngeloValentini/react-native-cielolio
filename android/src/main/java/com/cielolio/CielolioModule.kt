@@ -9,6 +9,7 @@ import cielo.sdk.order.ServiceBindListener
 import cielo.sdk.order.payment.Payment
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -92,9 +93,12 @@ class CielolioModule(private var reactContext: ReactApplicationContext) :
             val gson: Gson = Gson()
             val json: String = gson.toJson(paymentResult)
 
-            promise.resolve(json)
+            val data = Arguments.createMap()
+            data.putString("payment", json)
 
             orderManager?.unbind()
+
+            promise.resolve(data)
           }
 
           override fun onCancel() {
