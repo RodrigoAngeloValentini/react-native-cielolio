@@ -105,7 +105,7 @@ initialize(clientID, accessToken)
 
     placeOrder();
 
-    requestPayment(totalFormattedCielo, orderId)
+    requestPayment(total, orderId)
       .then(res => {
         const paymentData = transformCieloPaymentResponse(JSON.parse(res));
 
