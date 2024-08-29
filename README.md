@@ -9,7 +9,7 @@ React Native CieloLio
 from npm
 
 ```bash
-npm install react-native-lio --save
+npm install react-native-cielolio --save
 ```
 
 2. Download SDK Cielo
