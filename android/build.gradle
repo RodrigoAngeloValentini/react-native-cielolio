@@ -107,7 +107,7 @@ dependencies {
   implementation "com.google.code.gson:gson:2.10.1"
   // implementation "com.facebook.react:react-android:+" // Use this while using Android Studio
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation "com.cielo.lio:order-manager:1.8.6"
+  implementation "com.cielo.lio:order-manager:2.0.1"
   implementation "com.squareup.okhttp3:okhttp"
   implementation platform("com.squareup.okhttp3:okhttp-bom:4.4.1")
   implementation "org.jetbrains:annotations:23.0.0"
