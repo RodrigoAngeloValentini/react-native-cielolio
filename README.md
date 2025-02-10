@@ -34,7 +34,7 @@ allprojects {
 
 ```groove
 dependencies {
-  implementation 'com.cielo.lio:order-manager:2.0.1'
+  implementation 'com.cielo.lio:order-manager:2.1.7'
 }
 ```
 
